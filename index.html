@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#5B4BC4">
+  <meta name="description" content="Asset QR Print — Tem tài sản và in văn bản nội bộ.">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Nội bộ · Asset QR Print</title>
+  <link rel="icon" href="./favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" href="./favicon.png" sizes="64x64">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #f2f3f7; }
+    body { color: #34304a; font: 15px/1.6 "Segoe UI", Arial, sans-serif; }
+    [hidden] { display: none !important; }
+    iframe { display: block; width: 100%; height: 100%; height: 100dvh; border: 0; background: #f2f3f7; }
+    .setup { display: grid; place-items: center; height: 100%; padding: 24px; overflow: auto; }
+    .setup-card { max-width: 440px; padding: 32px; border: 1px solid #ddd8ef; border-radius: 16px; background: #fff; }
+    .setup-card img { display: block; width: 56px; height: 56px; margin-bottom: 18px; }
+    .setup-card h1 { margin: 0 0 8px; font-size: 22px; line-height: 1.4; }
+    .setup-card p { margin: 8px 0 0; color: #6c657f; }
+    .edition { display: inline-block; margin-bottom: 12px; padding: 2px 7px; border-radius: 4px; background: #5B4BC4; color: #fff; font-size: 11px; font-weight: 700; }
+    code { font-family: Consolas, monospace; color: #5B4BC4; }
+  </style>
+</head>
+<body data-edition="internal">
+  <main id="setup" class="setup">
+    <div class="setup-card">
+      <img src="./favicon.svg" alt="" width="56" height="56">
+      <span class="edition">NỘI BỘ</span>
+      <h1 id="setupTitle">Chưa gắn liên kết ứng dụng</h1>
+      <p id="setupMessage">Điền liên kết Apps Script kết thúc bằng /exec vào WEB_APP_URL trong index.html, rồi cập nhật tệp lên GitHub.</p>
+      <noscript><p>Hãy bật JavaScript để mở ứng dụng.</p></noscript>
+    </div>
+  </main>
+  <iframe id="appFrame" title="Asset QR Print — Nội bộ — Tem tài sản và in văn bản"
+    allow="clipboard-read; clipboard-write" loading="eager" hidden></iframe>
+  <script>
+    // Dán URL /exec của riêng dự án Apps Script NỘI BỘ vào giữa hai dấu nháy.
+    const WEB_APP_URL = '';
+
+    (function openInternalApp() {
+      const rawUrl = WEB_APP_URL.trim();
+      if (!rawUrl) return;
+      const setup = document.getElementById('setup');
+      const frame = document.getElementById('appFrame');
+      try {
+        const url = new URL(rawUrl);
+        const validPath = /^\/(?:macros|a\/macros\/[^/]+|a\/[^/]+\/macros)\/s\/[A-Za-z0-9_-]+\/exec$/.test(url.pathname);
+        if (url.protocol !== 'https:' || url.hostname !== 'script.google.com' || url.port || url.username || url.password || !validPath) {
+          throw new Error('invalid-web-app-url');
+        }
+        // /?mode=info mở In văn bản; các tham số khác trên trang GitHub được bỏ qua.
+        const mode = new URLSearchParams(window.location.search).get('mode');
+        if (mode === 'info' || mode === 'assets') url.searchParams.set('mode', mode);
+        if (url.searchParams.get('mode') === 'info') document.title = 'In văn bản · Nội bộ · Asset QR Print';
+        frame.src = url.href;
+        setup.hidden = true;
+        frame.hidden = false;
+      } catch (error) {
+        document.getElementById('setupTitle').textContent = 'Liên kết ứng dụng chưa đúng';
+        document.getElementById('setupMessage').textContent = 'Kiểm tra WEB_APP_URL trong index.html. Cần dùng liên kết HTTPS của Apps Script kết thúc bằng /exec.';
+      }
+    })();
+  </script>
+</body>
+</html>
